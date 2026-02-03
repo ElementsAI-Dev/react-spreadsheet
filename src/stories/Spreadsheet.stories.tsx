@@ -12,8 +12,9 @@ import {
   EmptySelection,
   Point,
   SpreadsheetRef,
+  VirtualizationConfig,
 } from "..";
-import * as Matrix from "../matrix";
+import * as Matrix from "../core/matrix";
 import { AsyncCellDataEditor, AsyncCellDataViewer } from "./AsyncCellData";
 import CustomCell from "./CustomCell";
 import { RangeEdit, RangeView } from "./RangeDataComponents";
@@ -127,16 +128,16 @@ export const Controlled: StoryFn<Props<StringCell>> = (props) => {
           const nextRow = [...row];
           nextRow.length += 1;
           return nextRow;
-        })
+        }),
       ),
-    [setData]
+    [setData],
   );
 
   const removeColumn = React.useCallback(() => {
     setData((data) =>
       data.map((row) => {
         return row.slice(0, row.length - 1);
-      })
+      }),
     );
   }, [setData]);
 
@@ -146,7 +147,7 @@ export const Controlled: StoryFn<Props<StringCell>> = (props) => {
         const { columns } = Matrix.getSize(data);
         return [...data, Array(columns)];
       }),
-    [setData]
+    [setData],
   );
 
   const removeRow = React.useCallback(() => {
@@ -196,7 +197,7 @@ export const Readonly: StoryObj = {
     data: Matrix.set(
       { row: 0, column: 0 },
       { readOnly: true, value: "Read Only" },
-      createEmptyMatrix<StringCell>(INITIAL_ROWS, INITIAL_COLUMNS)
+      createEmptyMatrix<StringCell>(INITIAL_ROWS, INITIAL_COLUMNS),
     ),
   },
 };
@@ -211,7 +212,7 @@ export const WithAsyncCellData: StoryObj = {
         DataViewer: AsyncCellDataViewer,
         DataEditor: AsyncCellDataEditor,
       },
-      createEmptyMatrix<StringCell>(INITIAL_ROWS, INITIAL_COLUMNS)
+      createEmptyMatrix<StringCell>(INITIAL_ROWS, INITIAL_COLUMNS),
     ),
   },
 };
@@ -231,7 +232,7 @@ export const RangeCell: StoryObj = {
         DataViewer: RangeView,
         DataEditor: RangeEdit,
       },
-      createEmptyMatrix<NumberCell>(INITIAL_ROWS, INITIAL_COLUMNS)
+      createEmptyMatrix<NumberCell>(INITIAL_ROWS, INITIAL_COLUMNS),
     ),
   },
 };
@@ -247,7 +248,7 @@ export const WithSelectCell: StoryObj = {
         DataEditor: SelectEdit,
         className: "select-cell",
       },
-      createEmptyMatrix<StringCell>(INITIAL_ROWS, INITIAL_COLUMNS)
+      createEmptyMatrix<StringCell>(INITIAL_ROWS, INITIAL_COLUMNS),
     ),
   },
 };
@@ -261,7 +262,7 @@ export const WithCornerIndicator: StoryObj = {
 
 export const Filter: StoryFn<Props<StringCell>> = (props) => {
   const [data, setData] = React.useState(
-    EMPTY_DATA as Matrix.Matrix<StringCell>
+    EMPTY_DATA as Matrix.Matrix<StringCell>,
   );
   const [filter, setFilter] = React.useState("");
 
@@ -270,7 +271,7 @@ export const Filter: StoryFn<Props<StringCell>> = (props) => {
       const nextFilter = event.target.value;
       setFilter(nextFilter);
     },
-    [setFilter]
+    [setFilter],
   );
 
   /**
@@ -321,7 +322,7 @@ export const Filter: StoryFn<Props<StringCell>> = (props) => {
 
 export const ControlledSelection: StoryFn<Props<StringCell>> = (props) => {
   const [selected, setSelected] = React.useState<Selection>(
-    new EmptySelection()
+    new EmptySelection(),
   );
   const handleSelect = React.useCallback((selection: Selection) => {
     setSelected(selection);
@@ -398,3 +399,142 @@ export const ControlledActivation: StoryFn<Props<StringCell>> = (props) => {
     </div>
   );
 };
+
+// Generate large dataset for virtualization demo
+const LARGE_ROWS = 1000;
+const LARGE_COLUMNS = 26;
+const LARGE_DATA = Array.from({ length: LARGE_ROWS }, (_, rowIndex) =>
+  Array.from({ length: LARGE_COLUMNS }, (_, colIndex) => ({
+    value: `R${rowIndex + 1}C${colIndex + 1}`,
+  })),
+);
+
+export const Virtualized: StoryFn<Props<StringCell>> = (props) => {
+  const [virtualizationConfig, setVirtualizationConfig] =
+    React.useState<VirtualizationConfig>({
+      enabled: true,
+      height: 500,
+      width: 800,
+      rowHeight: 28,
+      columnWidth: 100,
+      overscanRowCount: 3,
+      overscanColumnCount: 2,
+    });
+
+  return (
+    <div>
+      <div style={{ marginBottom: 16 }}>
+        <h3>
+          Virtualization Demo ({LARGE_ROWS} rows × {LARGE_COLUMNS} columns)
+        </h3>
+        <p>
+          This demo shows virtualization with a large dataset. Only visible
+          cells are rendered for optimal performance.
+        </p>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <label>
+            Height:
+            <input
+              type="number"
+              value={virtualizationConfig.height}
+              onChange={(e) =>
+                setVirtualizationConfig((prev) => ({
+                  ...prev,
+                  height: Number(e.target.value),
+                }))
+              }
+              style={{ width: 80, marginLeft: 8 }}
+            />
+          </label>
+          <label>
+            Width:
+            <input
+              type="number"
+              value={virtualizationConfig.width}
+              onChange={(e) =>
+                setVirtualizationConfig((prev) => ({
+                  ...prev,
+                  width: Number(e.target.value),
+                }))
+              }
+              style={{ width: 80, marginLeft: 8 }}
+            />
+          </label>
+          <label>
+            Row Height:
+            <input
+              type="number"
+              value={virtualizationConfig.rowHeight}
+              onChange={(e) =>
+                setVirtualizationConfig((prev) => ({
+                  ...prev,
+                  rowHeight: Number(e.target.value),
+                }))
+              }
+              style={{ width: 60, marginLeft: 8 }}
+            />
+          </label>
+          <label>
+            Column Width:
+            <input
+              type="number"
+              value={virtualizationConfig.columnWidth as number}
+              onChange={(e) =>
+                setVirtualizationConfig((prev) => ({
+                  ...prev,
+                  columnWidth: Number(e.target.value),
+                }))
+              }
+              style={{ width: 60, marginLeft: 8 }}
+            />
+          </label>
+        </div>
+      </div>
+      <Spreadsheet
+        {...props}
+        data={LARGE_DATA}
+        virtualization={virtualizationConfig}
+      />
+    </div>
+  );
+};
+
+Virtualized.args = {};
+
+export const VirtualizedWithFormulas: StoryFn<Props<StringCell>> = (props) => {
+  // Generate data with formulas
+  const dataWithFormulas = React.useMemo(() => {
+    return Array.from({ length: 500 }, (_, rowIndex) =>
+      Array.from({ length: 10 }, (_, colIndex) => {
+        if (colIndex === 0) {
+          return { value: rowIndex + 1 };
+        }
+        if (colIndex === 1) {
+          return { value: (rowIndex + 1) * 10 };
+        }
+        if (colIndex === 2 && rowIndex > 0) {
+          return { value: `=A${rowIndex + 1}+B${rowIndex + 1}` };
+        }
+        return { value: `Cell ${rowIndex + 1},${colIndex + 1}` };
+      }),
+    );
+  }, []);
+
+  return (
+    <div>
+      <h3>Virtualized Spreadsheet with Formulas (500 rows)</h3>
+      <p>Column C contains formulas: =A+B for each row</p>
+      <Spreadsheet
+        {...props}
+        data={dataWithFormulas}
+        virtualization={{
+          enabled: true,
+          height: 400,
+          width: 700,
+        }}
+      />
+    </div>
+  );
+};
+
+VirtualizedWithFormulas.args = {};

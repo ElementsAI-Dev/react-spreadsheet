@@ -1,10 +1,10 @@
 import * as Types from "./types";
-import * as Matrix from "./matrix";
-import * as Point from "./point";
-import { PointRange } from "./point-range";
-import { Selection } from "./selection";
+import * as Matrix from "./core/matrix";
+import * as Point from "./core/point";
+import { PointRange } from "./core/point-range";
+import { Selection } from "./core/selection";
 
-export { createEmpty as createEmptyMatrix } from "./matrix";
+export { createEmpty as createEmptyMatrix } from "./core/matrix";
 
 export const PLAIN_TEXT_MIME = "text/plain";
 export const FOCUS_WITHIN_SELECTOR = ":focus-within";
@@ -14,6 +14,10 @@ export function moveCursorToEnd(el: HTMLInputElement): void {
   el.selectionStart = el.selectionEnd = el.value.length;
 }
 
+/** Cache for commonly used ranges to avoid recreating arrays */
+const rangeCache = new Map<string, number[]>();
+const RANGE_CACHE_MAX_SIZE = 100;
+
 /**
  * Creates an array of numbers (positive and/or negative) progressing from start up to, but not including, end. A step of -1 is used if a negative start is specified without an end or step. If end is not specified, it's set to start with start then set to 0.
  * @param end - an integer number specifying at which position to stop (not included).
@@ -21,15 +25,38 @@ export function moveCursorToEnd(el: HTMLInputElement): void {
  * @param step - An integer number specifying the incrementation
  */
 export function range(end: number, start = 0, step = 1): number[] {
-  const array = [];
+  // For simple cases (start=0, step=1), use cache
+  if (start === 0 && step === 1 && end >= 0 && end <= 1000) {
+    const cacheKey = String(end);
+    const cached = rangeCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+    // Pre-allocate array for better performance
+    const array = new Array<number>(end);
+    for (let i = 0; i < end; i++) {
+      array[i] = i;
+    }
+    // Limit cache size
+    if (rangeCache.size < RANGE_CACHE_MAX_SIZE) {
+      rangeCache.set(cacheKey, array);
+    }
+    return array;
+  }
+
+  // For other cases, use original logic with pre-allocation
+  const length = Math.ceil(Math.abs((end - start) / step));
+  const array = new Array<number>(length);
+  let index = 0;
+
   if (Math.sign(end - start) === -1) {
     for (let element = start; element > end; element -= step) {
-      array.push(element);
+      array[index++] = element;
     }
     return array;
   }
   for (let element = start; element < end; element += step) {
-    array.push(element);
+    array[index++] = element;
   }
   return array;
 }
@@ -37,7 +64,7 @@ export function range(end: number, start = 0, step = 1): number[] {
 /** Return whether given point is active */
 export function isActive(
   active: Types.StoreState["active"],
-  point: Point.Point
+  point: Point.Point,
 ): boolean {
   return Boolean(active && Point.isEqual(point, active));
 }
@@ -55,7 +82,7 @@ export function getOffsetRect(element: HTMLElement): Types.Dimensions {
 /** Write given data to clipboard with given event */
 export function writeTextToClipboard(
   event: ClipboardEvent,
-  data: string
+  data: string,
 ): void {
   event.clipboardData?.setData(PLAIN_TEXT_MIME, data);
 }
@@ -77,7 +104,7 @@ export function readTextFromClipboard(event: ClipboardEvent): string {
 export function getCellDimensions(
   point: Point.Point,
   rowDimensions: Types.StoreState["rowDimensions"] | undefined,
-  columnDimensions: Types.StoreState["columnDimensions"] | undefined
+  columnDimensions: Types.StoreState["columnDimensions"] | undefined,
 ): Types.Dimensions | undefined {
   const cellRowDimensions = rowDimensions && rowDimensions[point.row];
   const cellColumnDimensions =
@@ -95,17 +122,17 @@ export function getCellDimensions(
 export function getRangeDimensions(
   rowDimensions: Types.StoreState["rowDimensions"],
   columnDimensions: Types.StoreState["columnDimensions"],
-  range: PointRange
+  range: PointRange,
 ): Types.Dimensions | undefined {
   const startDimensions = getCellDimensions(
     range.start,
     rowDimensions,
-    columnDimensions
+    columnDimensions,
   );
   const endDimensions = getCellDimensions(
     range.end,
     rowDimensions,
-    columnDimensions
+    columnDimensions,
   );
   return (
     startDimensions &&
@@ -123,7 +150,7 @@ export function getSelectedDimensions(
   rowDimensions: Types.StoreState["rowDimensions"],
   columnDimensions: Types.StoreState["columnDimensions"],
   data: Matrix.Matrix<unknown>,
-  selected: Selection
+  selected: Selection,
 ): Types.Dimensions | undefined {
   const range = selected.toRange(data);
   return range
@@ -147,7 +174,7 @@ export function getCSV(data: Matrix.Matrix<Types.CellBase>): string {
 export function calculateSpreadsheetSize(
   data: Matrix.Matrix<unknown>,
   rowLabels?: string[],
-  columnLabels?: string[]
+  columnLabels?: string[],
 ): Matrix.Size {
   const { columns, rows } = Matrix.getSize(data);
   return {
@@ -159,7 +186,7 @@ export function calculateSpreadsheetSize(
 /** Should spreadsheet handle clipboard event */
 export function shouldHandleClipboardEvent(
   root: Element | null,
-  mode: Types.Mode
+  mode: Types.Mode,
 ): boolean {
   return root !== null && mode === "view" && isFocusedWithin(root);
 }

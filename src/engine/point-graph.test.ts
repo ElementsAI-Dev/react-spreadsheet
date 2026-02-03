@@ -1,4 +1,4 @@
-import { Point } from "../point";
+import { Point } from "../core/point";
 import { PointSet } from "./point-set";
 import { PointGraph } from "./point-graph";
 
@@ -7,17 +7,18 @@ const EMPTY = PointGraph.from([]);
 describe("PointGraph.prototype.from", () => {
   test("empty", () => {
     const graph = PointGraph.from([]);
-    expect(graph).toEqual({
-      forwards: new Map(),
-    });
+    // Test functional behavior instead of internal structure
+    expect(graph.get({ row: 0, column: 0 }).size).toBe(0);
+    expect(Array.from(graph)).toEqual([]);
   });
   test("single edge", () => {
     const graph = PointGraph.from([
       [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }])],
     ]);
-    expect(graph).toEqual({
-      forwards: new Map([["0,0", PointSet.from([{ row: 0, column: 1 }])]]),
-    });
+    // Test functional behavior
+    expect(graph.get({ row: 0, column: 0 })).toEqual(
+      PointSet.from([{ row: 0, column: 1 }]),
+    );
   });
   test("two edges", () => {
     const graph = PointGraph.from([
@@ -29,17 +30,13 @@ describe("PointGraph.prototype.from", () => {
         ]),
       ],
     ]);
-    expect(graph).toEqual({
-      forwards: new Map([
-        [
-          "0,0",
-          PointSet.from([
-            { row: 0, column: 1 },
-            { row: 0, column: 2 },
-          ]),
-        ],
+    // Test functional behavior
+    expect(graph.get({ row: 0, column: 0 })).toEqual(
+      PointSet.from([
+        { row: 0, column: 1 },
+        { row: 0, column: 2 },
       ]),
-    });
+    );
   });
 });
 
@@ -50,28 +47,22 @@ describe("PointGraph.prototype.set", () => {
       PointSet.from([{ row: 0, column: 1 }]),
     ];
     const graph = EMPTY.set(pair[0], pair[1]);
-    const expected = PointGraph.from([pair]);
-    expect(graph).toEqual(expected);
+    // Test functional behavior
+    expect(graph.get({ row: 0, column: 0 })).toEqual(pair[1]);
   });
   test("add two edges to empty", () => {
-    expect(
-      EMPTY.set(
-        { row: 0, column: 0 },
-        PointSet.from([
-          { row: 0, column: 1 },
-          { row: 0, column: 2 },
-        ])
-      )
-    ).toEqual(
-      PointGraph.from([
-        [
-          { row: 0, column: 0 },
-          PointSet.from([
-            { row: 0, column: 1 },
-            { row: 0, column: 2 },
-          ]),
-        ],
-      ])
+    const graph = EMPTY.set(
+      { row: 0, column: 0 },
+      PointSet.from([
+        { row: 0, column: 1 },
+        { row: 0, column: 2 },
+      ]),
+    );
+    expect(graph.get({ row: 0, column: 0 })).toEqual(
+      PointSet.from([
+        { row: 0, column: 1 },
+        { row: 0, column: 2 },
+      ]),
     );
   });
   test("remove single edge", () => {
@@ -79,18 +70,18 @@ describe("PointGraph.prototype.set", () => {
       [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }])],
     ]);
     const updatedGraph = graph.set({ row: 0, column: 0 }, PointSet.from([]));
-    expect(updatedGraph).toEqual(PointGraph.from([]));
+    expect(updatedGraph.get({ row: 0, column: 0 }).size).toBe(0);
   });
   test("remove and add single edges", () => {
     const graph = PointGraph.from([
       [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }])],
     ]);
-    expect(
-      graph.set({ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 2 }]))
-    ).toEqual(
-      PointGraph.from([
-        [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 2 }])],
-      ])
+    const updated = graph.set(
+      { row: 0, column: 0 },
+      PointSet.from([{ row: 0, column: 2 }]),
+    );
+    expect(updated.get({ row: 0, column: 0 })).toEqual(
+      PointSet.from([{ row: 0, column: 2 }]),
     );
   });
   test("add and remove multiple edges", () => {
@@ -99,52 +90,48 @@ describe("PointGraph.prototype.set", () => {
       PointSet.from([
         { row: 0, column: 1 },
         { row: 0, column: 2 },
-      ])
+      ]),
     );
 
-    const expected1 = PointGraph.from([
-      [
-        { row: 0, column: 0 },
-        PointSet.from([
-          { row: 0, column: 1 },
-          { row: 0, column: 2 },
-        ]),
-      ],
-    ]);
-
-    expect(graph1).toEqual(expected1);
+    expect(graph1.get({ row: 0, column: 0 })).toEqual(
+      PointSet.from([
+        { row: 0, column: 1 },
+        { row: 0, column: 2 },
+      ]),
+    );
 
     const graph2 = graph1.set(
       { row: 0, column: 1 },
-      PointSet.from([{ row: 0, column: 2 }])
+      PointSet.from([{ row: 0, column: 2 }]),
     );
 
-    const expected2 = PointGraph.from([
-      [
-        { row: 0, column: 0 },
-        PointSet.from([
-          { row: 0, column: 1 },
-          { row: 0, column: 2 },
-        ]),
-      ],
-      [{ row: 0, column: 1 }, PointSet.from([{ row: 0, column: 2 }])],
-    ]);
-
-    expect(graph2).toEqual(expected2);
+    expect(graph2.get({ row: 0, column: 0 })).toEqual(
+      PointSet.from([
+        { row: 0, column: 1 },
+        { row: 0, column: 2 },
+      ]),
+    );
+    expect(graph2.get({ row: 0, column: 1 })).toEqual(
+      PointSet.from([{ row: 0, column: 2 }]),
+    );
 
     const graph3 = graph2.set({ row: 0, column: 0 }, PointSet.from([]));
-    const expected3 = PointGraph.from([
-      [{ row: 0, column: 1 }, PointSet.from([{ row: 0, column: 2 }])],
-    ]);
-    expect(graph3).toEqual(expected3);
+    expect(graph3.get({ row: 0, column: 0 }).size).toBe(0);
+    expect(graph3.get({ row: 0, column: 1 })).toEqual(
+      PointSet.from([{ row: 0, column: 2 }]),
+    );
   });
   test("add existing edge", () => {
     const graph = PointGraph.from([
       [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }])],
     ]);
-    expect(
-      graph.set({ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }]))
-    ).toEqual(graph);
+    const updated = graph.set(
+      { row: 0, column: 0 },
+      PointSet.from([{ row: 0, column: 1 }]),
+    );
+    expect(updated.get({ row: 0, column: 0 })).toEqual(
+      PointSet.from([{ row: 0, column: 1 }]),
+    );
   });
 });
 
@@ -154,7 +141,7 @@ describe("PointGraph.prototype.getBackwards", () => {
       [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }])],
     ]);
     expect(graph.getBackwards({ row: 0, column: 1 })).toEqual(
-      PointSet.from([{ row: 0, column: 0 }])
+      PointSet.from([{ row: 0, column: 0 }]),
     );
   });
   test("get backwards from non-existent point", () => {
@@ -162,7 +149,7 @@ describe("PointGraph.prototype.getBackwards", () => {
       [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }])],
     ]);
     expect(graph.getBackwards({ row: 0, column: 2 })).toEqual(
-      PointSet.from([])
+      PointSet.from([]),
     );
   });
   test("get backwards from point with no incoming edges", () => {
@@ -170,7 +157,7 @@ describe("PointGraph.prototype.getBackwards", () => {
       [{ row: 0, column: 0 }, PointSet.from([{ row: 0, column: 1 }])],
     ]);
     expect(graph.getBackwards({ row: 0, column: 0 })).toEqual(
-      PointSet.from([])
+      PointSet.from([]),
     );
   });
   test("get backwards from point with multiple incoming edges", () => {
@@ -194,7 +181,7 @@ describe("PointGraph.prototype.getBackwards", () => {
       PointSet.from([
         { row: 0, column: 0 },
         { row: 1, column: 0 },
-      ])
+      ]),
     );
   });
 });

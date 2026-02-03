@@ -5,9 +5,8 @@ import FormulaParser, {
   FormulaParserConfig,
   Value,
 } from "fast-formula-parser";
-import { PointRange } from "../point-range";
-import { Point } from "../point";
-import * as Matrix from "../matrix";
+import { Point } from "../core/point";
+import * as Matrix from "../core/matrix";
 import { CellBase } from "../types";
 import { PointSet } from "./point-set";
 
@@ -29,7 +28,7 @@ export function extractFormula(value: string): string {
 
 export function createFormulaParser(
   data: Matrix.Matrix<CellBase>,
-  config?: Omit<FormulaParserConfig, "onCell" | "onRange">
+  config?: Omit<FormulaParserConfig, "onCell" | "onRange">,
 ): FormulaParser {
   return new FormulaParser({
     ...config,
@@ -70,37 +69,35 @@ const depParser = new DepParser();
 export function getReferences(
   formula: string,
   point: Point,
-  data: Matrix.Matrix<CellBase>
+  data: Matrix.Matrix<CellBase>,
 ): PointSet {
   const { rows, columns } = Matrix.getSize(data);
   try {
     const dependencies = depParser.parse(formula, convertPointToCellRef(point));
 
-    const references = PointSet.from(
-      dependencies.flatMap((reference) => {
-        const isRange = "from" in reference;
-        if (isRange) {
-          const { from, to } = reference;
+    // Build points array directly without intermediate arrays from flatMap/Array.from
+    const points: Point[] = [];
+    for (const reference of dependencies) {
+      const isRange = "from" in reference;
+      if (isRange) {
+        const { from, to } = reference;
+        const startRow = from.row - 1;
+        const startCol = from.col - 1;
+        const endRow = Math.min(to.row - 1, rows - 1);
+        const endCol = Math.min(to.col - 1, columns - 1);
 
-          const normalizedFrom: Point = {
-            row: from.row - 1,
-            column: from.col - 1,
-          };
-
-          const normalizedTo: Point = {
-            row: Math.min(to.row - 1, rows - 1),
-            column: Math.min(to.col - 1, columns - 1),
-          };
-
-          const range = new PointRange(normalizedFrom, normalizedTo);
-
-          return Array.from(range);
+        // Iterate range directly instead of creating PointRange + Array.from
+        for (let row = startRow; row <= endRow; row++) {
+          for (let col = startCol; col <= endCol; col++) {
+            points.push({ row, column: col });
+          }
         }
-        return { row: reference.row - 1, column: reference.col - 1 };
-      })
-    );
+      } else {
+        points.push({ row: reference.row - 1, column: reference.col - 1 });
+      }
+    }
 
-    return references;
+    return PointSet.from(points);
   } catch (error) {
     if (error instanceof FormulaError) {
       return PointSet.from([]);
@@ -113,7 +110,7 @@ export function getReferences(
 export function evaluate(
   formula: string,
   point: Point,
-  formulaParser: FormulaParser
+  formulaParser: FormulaParser,
 ): Value {
   try {
     const position = convertPointToCellRef(point);

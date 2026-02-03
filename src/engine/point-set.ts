@@ -1,4 +1,4 @@
-import * as Point from "../point";
+import * as Point from "../core/point";
 import * as pointHash from "./point-hash";
 
 /**
@@ -16,6 +16,16 @@ export class PointSet {
     return new PointSet(set);
   }
 
+  /** Creates a PointSet directly from a Set of hashed strings (internal use) */
+  private static fromHashSet(set: Set<string>): PointSet {
+    return new PointSet(set);
+  }
+
+  /** Returns the internal Set for efficient operations (internal use) */
+  get _internalSet(): Set<string> {
+    return this.set;
+  }
+
   /** Returns a boolean asserting whether an point is present with the given value in the Set object or not */
   has(point: Point.Point): boolean {
     return this.set.has(pointHash.toString(point));
@@ -28,36 +38,61 @@ export class PointSet {
 
   /** Add the given point to given set */
   add(point: Point.Point): PointSet {
+    const hash = pointHash.toString(point);
+    if (this.set.has(hash)) {
+      return this;
+    }
     const newSet = new Set(this.set);
-    newSet.add(pointHash.toString(point));
+    newSet.add(hash);
     return new PointSet(newSet);
   }
 
   /** Remove the given point from the given set */
   delete(point: Point.Point): PointSet {
-    const newSet = new Set(this.set);
-    if (!newSet.delete(pointHash.toString(point))) {
+    const hash = pointHash.toString(point);
+    if (!this.set.has(hash)) {
       return this;
     }
+    const newSet = new Set(this.set);
+    newSet.delete(hash);
     return new PointSet(newSet);
   }
 
-  /** Returns a new PointSet with points common to the set and other */
+  /** Returns a new PointSet with points in this set but not in other */
   difference(other: PointSet): PointSet {
-    let newSet = this as PointSet;
-    for (const point of other) {
-      newSet = newSet.delete(point);
+    if (other.size === 0) {
+      return this;
     }
-    return newSet;
+    const otherSet = other._internalSet;
+    const newSet = new Set<string>();
+    for (const hash of this.set) {
+      if (!otherSet.has(hash)) {
+        newSet.add(hash);
+      }
+    }
+    if (newSet.size === this.set.size) {
+      return this;
+    }
+    return PointSet.fromHashSet(newSet);
   }
 
   /** Returns a new PointSet with all points in both sets */
   union(other: PointSet): PointSet {
-    let newSet = this as PointSet;
-    for (const point of other) {
-      newSet = newSet.add(point);
+    if (other.size === 0) {
+      return this;
     }
-    return newSet;
+    if (this.size === 0) {
+      return other;
+    }
+    const newSet = new Set(this.set);
+    let changed = false;
+    for (const hash of other._internalSet) {
+      if (!newSet.has(hash)) {
+        newSet.add(hash);
+        changed = true;
+      }
+    }
+    return changed ? PointSet.fromHashSet(newSet) : this;
   }
 
   /** Creates an iterator of points in the set */

@@ -22,7 +22,7 @@ yarn add react react-dom scheduler react-spreadsheet
 ### Features
 
 - Simple straightforward API focusing on common use cases while keeping flexibility
-- Performant (yet not virtualized)
+- Performant with optional virtualization for large datasets
 - Implements Just Components™
 
 ### [Demo](https://iddan.github.io/react-spreadsheet)

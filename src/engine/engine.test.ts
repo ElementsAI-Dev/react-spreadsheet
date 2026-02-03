@@ -1,6 +1,6 @@
 import FormulaParser, { FormulaError } from "fast-formula-parser";
 import { CellBase } from "../types";
-import { ORIGIN, Point } from "../point";
+import { ORIGIN, Point } from "../core/point";
 import * as Formula from "./formula";
 import { getFormulaComputedValue, updateCellValue, Model } from "./engine";
 
@@ -33,12 +33,12 @@ describe("getFormulaComputedValue()", () => {
   test.each(cases)("%s", (name, expected, mockParseReturn) => {
     MOCK_PARSE.mockImplementationOnce(() => mockParseReturn);
     expect(
-      getFormulaComputedValue(EXAMPLE_FORMULA, ORIGIN, MOCK_FORMULA_PARSER)
+      getFormulaComputedValue(EXAMPLE_FORMULA, ORIGIN, MOCK_FORMULA_PARSER),
     ).toBe(expected);
     expect(MOCK_FORMULA_PARSER.parse).toBeCalledTimes(1);
     expect(MOCK_FORMULA_PARSER.parse).toBeCalledWith(
       Formula.extractFormula(EXAMPLE_FORMULA),
-      { col: 1, row: 1, sheet: "Sheet1" }
+      { col: 1, row: 1, sheet: "Sheet1" },
     );
   });
 });

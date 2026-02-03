@@ -1,10 +1,10 @@
 import * as React from "react";
 import FormulaParser from "fast-formula-parser";
-import { Point } from "./point";
-import { Selection } from "./selection";
+import { Point } from "./core/point";
+import { Selection } from "./core/selection";
 import { Model } from "./engine";
-import { PointRange } from "./point-range";
-import { Matrix } from "./matrix";
+import { PointRange } from "./core/point-range";
+import { Matrix } from "./core/matrix";
 
 /** The base type of cell data in Spreadsheet */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -209,3 +209,23 @@ export type CommitChanges<Cell extends CellBase = CellBase> = Array<{
 }>;
 
 export type CreateFormulaParser = (data: Matrix<CellBase>) => FormulaParser;
+
+/** Virtualization configuration for the spreadsheet */
+export type VirtualizationConfig = {
+  /** Enable virtualization (default: false for backward compatibility) */
+  enabled: boolean;
+  /** Height of the virtualized container in pixels */
+  height: number;
+  /** Width of the virtualized container in pixels */
+  width: number;
+  /** Height of each row in pixels (default: 28) */
+  rowHeight?: number;
+  /** Width of each column in pixels, or function returning width for each column index (default: 100) */
+  columnWidth?: number | ((index: number) => number);
+  /** Width of row indicator column in pixels (default: 50) */
+  rowIndicatorWidth?: number;
+  /** Number of rows to render outside visible area (default: 2) */
+  overscanRowCount?: number;
+  /** Number of columns to render outside visible area (default: 2) */
+  overscanColumnCount?: number;
+};

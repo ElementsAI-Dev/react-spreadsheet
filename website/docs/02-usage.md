@@ -88,7 +88,7 @@ TypeScript:
 
 ```typescript
 import { useState } from "react";
-import Spreadsheet from "react-spreadsheet";
+import Spreadsheet, { Matrix, CellBase } from "react-spreadsheet";
 
 const App = () => {
   const [data, setData] = useState<Matrix<CellBase>>([
@@ -96,5 +96,30 @@ const App = () => {
     [{ value: "Strawberry" }, { value: "Cookies" }, { value: "" }],
   ]);
   return <Spreadsheet data={data} onChange={setData} />;
+};
+```
+
+## Virtualization
+
+For large spreadsheets with many rows and columns, you can enable virtualization to improve performance. See the [Virtualization](./virtualization) documentation for details.
+
+```javascript
+import Spreadsheet from "react-spreadsheet";
+
+const App = () => {
+  const data = [
+    // ... large dataset
+  ];
+
+  return (
+    <Spreadsheet
+      data={data}
+      virtualization={{
+        enabled: true,
+        height: 400,
+        width: 800,
+      }}
+    />
+  );
 };
 ```

@@ -1,4 +1,4 @@
-import * as Point from "../point";
+import * as Point from "../core/point";
 import { PointSet } from "./point-set";
 
 const MIN_POINT = Point.ORIGIN;
@@ -38,8 +38,8 @@ describe("PointSet.prototype.difference()", () => {
         PointSet.from([
           { row: 0, column: 1 },
           { row: 1, column: 1 },
-        ])
-      )
+        ]),
+      ),
     ).toEqual(PointSet.from([MIN_POINT, MAX_POINT]));
   });
 });

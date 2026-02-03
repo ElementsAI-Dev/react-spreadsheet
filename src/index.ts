@@ -1,12 +1,23 @@
-import Spreadsheet, { SpreadsheetRef } from "./Spreadsheet";
-import DataEditor from "./DataEditor";
-import DataViewer from "./DataViewer";
+import Spreadsheet, { SpreadsheetRef } from "./components/Spreadsheet";
+import DataEditor from "./components/DataEditor";
+import DataViewer from "./components/DataViewer";
+import VirtualizedTable, {
+  useVirtualization,
+} from "./components/VirtualizedTable";
+export type { VirtualizedTableProps } from "./components/VirtualizedTable";
 
 export default Spreadsheet;
-export { Spreadsheet, DataEditor, DataViewer, SpreadsheetRef };
-export type { Props } from "./Spreadsheet";
-export { createEmpty as createEmptyMatrix } from "./matrix";
-export type { Matrix } from "./matrix";
+export {
+  Spreadsheet,
+  DataEditor,
+  DataViewer,
+  SpreadsheetRef,
+  VirtualizedTable,
+  useVirtualization,
+};
+export type { Props } from "./components/Spreadsheet";
+export { createEmpty as createEmptyMatrix } from "./core/matrix";
+export type { Matrix } from "./core/matrix";
 export {
   Selection,
   EmptySelection,
@@ -17,9 +28,9 @@ export {
   EntireWorksheetSelection,
   InvalidIndexError,
   RangeSelection,
-} from "./selection";
-export { PointRange } from "./point-range";
-export type { Point } from "./point";
+} from "./core/selection";
+export { PointRange } from "./core/point-range";
+export type { Point } from "./core/point";
 export type {
   CellBase,
   CellDescriptor,
@@ -44,5 +55,6 @@ export type {
   TableProps,
   HeaderRowProps,
   HeaderRowComponent,
+  VirtualizationConfig,
 } from "./types";
 export { createFormulaParser, Model } from "./engine";

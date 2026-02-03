@@ -3,10 +3,10 @@
  */
 
 import { Model, createFormulaParser } from "./engine";
-import * as Matrix from "./matrix";
-import * as Point from "./point";
-import { PointRange } from "./point-range";
-import { Selection, EmptySelection, RangeSelection } from "./selection";
+import * as Matrix from "./core/matrix";
+import * as Point from "./core/point";
+import { PointRange } from "./core/point-range";
+import { Selection, EmptySelection, RangeSelection } from "./core/selection";
 import * as Types from "./types";
 import * as util from "./util";
 
@@ -15,7 +15,7 @@ const EXAMPLE_DATA_ROWS_COUNT = 2;
 const EXAMPLE_DATA_COLUMNS_COUNT = 2;
 const EXAMPLE_DATA = Matrix.createEmpty<Types.CellBase>(
   EXAMPLE_DATA_ROWS_COUNT,
-  EXAMPLE_DATA_COLUMNS_COUNT
+  EXAMPLE_DATA_COLUMNS_COUNT,
 );
 const EXAMPLE_ROW_LABELS = ["Foo", "Bar", "Baz"];
 const EXAMPLE_COLUMN_LABELS = ["Foo", "Bar", "Baz"];
@@ -118,7 +118,7 @@ describe("calculateSpreadsheetSize()", () => {
 
   test("Returns the size of row labels if row labels is longer than data rows", () => {
     expect(
-      util.calculateSpreadsheetSize(EXAMPLE_DATA, EXAMPLE_ROW_LABELS)
+      util.calculateSpreadsheetSize(EXAMPLE_DATA, EXAMPLE_ROW_LABELS),
     ).toStrictEqual({
       rows: EXAMPLE_ROW_LABELS.length,
       columns: EXAMPLE_DATA_COLUMNS_COUNT,
@@ -130,8 +130,8 @@ describe("calculateSpreadsheetSize()", () => {
       util.calculateSpreadsheetSize(
         EXAMPLE_DATA,
         undefined,
-        EXAMPLE_COLUMN_LABELS
-      )
+        EXAMPLE_COLUMN_LABELS,
+      ),
     ).toStrictEqual({
       rows: EXAMPLE_DATA_ROWS_COUNT,
       columns: EXAMPLE_COLUMN_LABELS.length,
@@ -157,8 +157,8 @@ describe("getCellDimensions()", () => {
       util.getCellDimensions(
         point,
         EXAMPLE_STATE.rowDimensions,
-        EXAMPLE_STATE.columnDimensions
-      )
+        EXAMPLE_STATE.columnDimensions,
+      ),
     ).toEqual(expected);
   });
 });
@@ -218,8 +218,8 @@ describe("getRangeDimensions()", () => {
       util.getRangeDimensions(
         EXAMPLE_STATE.rowDimensions,
         EXAMPLE_STATE.columnDimensions,
-        range
-      )
+        range,
+      ),
     ).toEqual(expected);
   });
 });
@@ -234,7 +234,7 @@ describe("getSelectedDimensions()", () => {
       util.getRangeDimensions(
         EXAMPLE_STATE.rowDimensions,
         EXAMPLE_STATE.columnDimensions,
-        new PointRange(Point.ORIGIN, Point.ORIGIN)
+        new PointRange(Point.ORIGIN, Point.ORIGIN),
       ),
     ],
     ["no selection", new EmptySelection(), undefined],
@@ -245,8 +245,8 @@ describe("getSelectedDimensions()", () => {
         EXAMPLE_STATE.rowDimensions,
         EXAMPLE_STATE.columnDimensions,
         EXAMPLE_STATE.model.data,
-        selection
-      )
+        selection,
+      ),
     ).toEqual(expected);
   });
 });
@@ -282,7 +282,7 @@ describe("writeTextToClipboard()", () => {
   expect(event.clipboardData.setData).toBeCalledTimes(1);
   expect(event.clipboardData.setData).toBeCalledWith(
     util.PLAIN_TEXT_MIME,
-    EXAMPLE_STRING
+    EXAMPLE_STRING,
   );
 });
 
@@ -290,8 +290,8 @@ describe("getCSV()", () => {
   test("Returns given data as CSV", () => {
     expect(util.getCSV(EXAMPLE_DATA)).toBe(
       Matrix.join(
-        Matrix.createEmpty(EXAMPLE_DATA_ROWS_COUNT, EXAMPLE_DATA_COLUMNS_COUNT)
-      )
+        Matrix.createEmpty(EXAMPLE_DATA_ROWS_COUNT, EXAMPLE_DATA_COLUMNS_COUNT),
+      ),
     );
   });
 });
@@ -325,11 +325,11 @@ describe("readTextFromClipboard()", () => {
       },
     } as unknown as ClipboardEvent;
     expect(util.readTextFromClipboard(EXAMPLE_CLIPBOARD_EVENT)).toEqual(
-      EXAMPLE_STRING
+      EXAMPLE_STRING,
     );
     expect(EXAMPLE_CLIPBOARD_EVENT.clipboardData?.getData).toBeCalledTimes(1);
     expect(EXAMPLE_CLIPBOARD_EVENT.clipboardData?.getData).toBeCalledWith(
-      util.PLAIN_TEXT_MIME
+      util.PLAIN_TEXT_MIME,
     );
   });
   test("Returns string from window", () => {
@@ -341,7 +341,7 @@ describe("readTextFromClipboard()", () => {
     // @ts-ignore
     window.clipboardData = MOCK_CLIPBOARD_DATA;
     expect(util.readTextFromClipboard(EXAMPLE_CLIPBOARD_EVENT)).toBe(
-      EXAMPLE_STRING
+      EXAMPLE_STRING,
     );
     // @ts-ignore
     expect(MOCK_CLIPBOARD_DATA.getData).toBeCalledTimes(1);

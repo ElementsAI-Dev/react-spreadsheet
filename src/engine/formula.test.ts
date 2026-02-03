@@ -1,4 +1,4 @@
-import * as Point from "../point";
+import * as Point from "../core/point";
 import { PointSet } from "./point-set";
 import {
   isFormulaValue,
@@ -40,7 +40,7 @@ describe("getReferences()", () => {
       getReferences(SUM_A1_A2_FORMULA, Point.ORIGIN, [
         [{ value: 1 }],
         [{ value: 2 }],
-      ])
+      ]),
     ).toEqual(PointSet.from([A1_POINT, A2_POINT]));
   });
   test("gets range references", () => {
@@ -62,7 +62,7 @@ describe("evaluate()", () => {
     const data = [[{ value: 1 }], [{ value: 2 }]];
     const formulaParser = createFormulaParser(data);
     expect(
-      evaluate(SUM_A1_A2_FORMULA, { row: 1, column: 1 }, formulaParser)
+      evaluate(SUM_A1_A2_FORMULA, { row: 1, column: 1 }, formulaParser),
     ).toBe(3);
   });
 });

@@ -1,6 +1,6 @@
 import FormulaParser, { FormulaError, Value } from "fast-formula-parser";
-import * as Matrix from "../matrix";
-import { Point } from "../point";
+import * as Matrix from "../core/matrix";
+import { Point } from "../core/point";
 import { CellBase, CreateFormulaParser } from "../types";
 import * as Formula from "./formula";
 import { PointGraph } from "./point-graph";
@@ -16,7 +16,7 @@ export class Model<Cell extends CellBase> {
     createFormulaParser: CreateFormulaParser,
     data: Matrix.Matrix<Cell>,
     referenceGraph?: PointGraph,
-    evaluatedData?: Matrix.Matrix<Cell>
+    evaluatedData?: Matrix.Matrix<Cell>,
   ) {
     this.createFormulaParser = createFormulaParser;
     this.data = data;
@@ -30,7 +30,7 @@ export class Model<Cell extends CellBase> {
 export function updateCellValue<Cell extends CellBase>(
   model: Model<Cell>,
   point: Point,
-  cell: Cell
+  cell: Cell,
 ): Model<Cell> {
   const nextData = Matrix.set(point, cell, model.data);
   const nextReferenceGraph = Formula.isFormulaValue(cell.value)
@@ -44,13 +44,13 @@ export function updateCellValue<Cell extends CellBase>(
     nextReferenceGraph,
     point,
     cell,
-    formulaParser
+    formulaParser,
   );
   return new Model(
     model.createFormulaParser,
     nextData,
     nextReferenceGraph,
-    nextEvaluatedData
+    nextEvaluatedData,
   );
 }
 
@@ -58,12 +58,12 @@ function updateReferenceGraph(
   referenceGraph: PointGraph,
   point: Point,
   cell: CellBase<string>,
-  data: Matrix.Matrix<CellBase>
+  data: Matrix.Matrix<CellBase>,
 ): PointGraph {
   const references = Formula.getReferences(
     Formula.extractFormula(cell.value),
     point,
-    data
+    data,
   );
   const nextReferenceGraph = referenceGraph.set(point, references);
   return nextReferenceGraph;
@@ -75,15 +75,15 @@ function evaluateCell<Cell extends CellBase>(
   referenceGraph: PointGraph,
   point: Point,
   cell: Cell,
-  formulaParser: FormulaParser
+  formulaParser: FormulaParser,
 ): Matrix.Matrix<Cell> {
   if (referenceGraph.hasCircularDependency(point)) {
+    // Collect all updates for batch operation
+    const updates: Array<[Point, Cell]> = [
+      [point, { ...cell, value: FormulaError.REF } as Cell],
+    ];
     let visited = PointSet.from([point]);
-    let nextEvaluatedData = Matrix.set(
-      point,
-      { ...cell, value: FormulaError.REF },
-      prevEvaluatedData
-    );
+
     for (const referrer of referenceGraph.getBackwardsRecursive(point)) {
       if (visited.has(referrer)) {
         break;
@@ -93,24 +93,23 @@ function evaluateCell<Cell extends CellBase>(
       if (!referrerCell) {
         continue;
       }
-      nextEvaluatedData = Matrix.set(
+      updates.push([
         referrer,
-        { ...referrerCell, value: FormulaError.REF },
-        nextEvaluatedData
-      );
+        { ...referrerCell, value: FormulaError.REF } as Cell,
+      ]);
     }
-    return nextEvaluatedData;
+
+    return Matrix.setMultiple(updates, prevEvaluatedData);
   }
 
-  let nextEvaluatedData = prevEvaluatedData;
+  // Collect all updates for batch operation
+  const updates: Array<[Point, Cell]> = [];
 
   const evaluatedValue = Formula.isFormulaValue(cell.value)
     ? getFormulaComputedValue(cell.value, point, formulaParser)
     : cell.value;
 
-  const evaluatedCell = { ...cell, value: evaluatedValue };
-
-  nextEvaluatedData = Matrix.set(point, evaluatedCell, nextEvaluatedData);
+  updates.push([point, { ...cell, value: evaluatedValue } as Cell]);
 
   // for every formula cell that references the cell re-evaluate (recursive)
   for (const referrer of referenceGraph.getBackwardsRecursive(point)) {
@@ -119,13 +118,15 @@ function evaluateCell<Cell extends CellBase>(
       continue;
     }
     const evaluatedValue = Formula.isFormulaValue(referrerCell.value)
-      ? getFormulaComputedValue(referrerCell.value, point, formulaParser)
+      ? getFormulaComputedValue(referrerCell.value, referrer, formulaParser)
       : referrerCell.value;
-    const evaluatedCell = { ...referrerCell, value: evaluatedValue };
-    nextEvaluatedData = Matrix.set(referrer, evaluatedCell, nextEvaluatedData);
+    updates.push([
+      referrer,
+      { ...referrerCell, value: evaluatedValue } as Cell,
+    ]);
   }
 
-  return nextEvaluatedData;
+  return Matrix.setMultiple(updates, prevEvaluatedData);
 }
 
 /**
@@ -134,7 +135,7 @@ function evaluateCell<Cell extends CellBase>(
  * @returns the spreadsheet reference graph
  */
 export function createReferenceGraph(
-  data: Matrix.Matrix<CellBase>
+  data: Matrix.Matrix<CellBase>,
 ): PointGraph {
   const entries: Array<[Point, PointSet]> = [];
   for (const [point, cell] of Matrix.entries(data)) {
@@ -142,7 +143,7 @@ export function createReferenceGraph(
       const references = Formula.getReferences(
         Formula.extractFormula(cell.value),
         point,
-        data
+        data,
       );
       entries.push([point, references]);
     }
@@ -153,33 +154,43 @@ export function createReferenceGraph(
 export function createEvaluatedData<Cell extends CellBase>(
   data: Matrix.Matrix<Cell>,
   referenceGraph: PointGraph,
-  createFormulaParser: CreateFormulaParser
+  createFormulaParser: CreateFormulaParser,
 ): Matrix.Matrix<Cell> {
+  // Collect all formula cells that need evaluation
+  const formulaCells: Array<{ point: Point; cell: Cell }> = [];
+  for (const point of referenceGraph.traverseBFSBackwards()) {
+    const cell = Matrix.get(point, data);
+    if (cell && Formula.isFormulaValue(cell.value)) {
+      formulaCells.push({ point, cell });
+    }
+  }
+
+  // If no formula cells, return data as-is
+  if (formulaCells.length === 0) {
+    return data;
+  }
+
+  // For formula evaluation, we need to evaluate in order since formulas
+  // may depend on previously evaluated cells. Use mutable approach for
+  // intermediate state, then create immutable result.
   let evaluatedData = data;
   let formulaParser = createFormulaParser(evaluatedData);
 
-  // Iterate over the points in the reference graph, starting from the leaves
-  for (const point of referenceGraph.traverseBFSBackwards()) {
-    // Get the cell at the current point in the data Matrix
-    const cell = Matrix.get(point, data);
-    if (!cell) {
-      continue;
-    }
-
-    // If the cell is a formula cell, evaluate it
-    if (Formula.isFormulaValue(cell.value)) {
-      const evaluatedValue = getFormulaComputedValue(
-        cell.value,
-        point,
-        formulaParser
-      );
-      evaluatedData = Matrix.set(
-        point,
-        { ...cell, value: evaluatedValue },
-        evaluatedData
-      );
-      formulaParser = createFormulaParser(evaluatedData);
-    }
+  // Process formulas in dependency order (leaves first from BFS traversal)
+  for (const { point, cell } of formulaCells) {
+    const evaluatedValue = getFormulaComputedValue(
+      cell.value,
+      point,
+      formulaParser,
+    );
+    evaluatedData = Matrix.set(
+      point,
+      { ...cell, value: evaluatedValue },
+      evaluatedData,
+    );
+    // Only recreate parser if there are more cells to process
+    // This is necessary because subsequent formulas may reference this cell
+    formulaParser = createFormulaParser(evaluatedData);
   }
 
   return evaluatedData;
@@ -189,7 +200,7 @@ export function createEvaluatedData<Cell extends CellBase>(
 export function getFormulaComputedValue(
   value: string,
   point: Point,
-  formulaParser: FormulaParser
+  formulaParser: FormulaParser,
 ): Value {
   const formula = Formula.extractFormula(value);
   try {
