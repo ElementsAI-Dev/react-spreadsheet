@@ -27,7 +27,7 @@ export default [
       exports: "named",
       sourcemap: true,
     },
-    plugins: [typescript(), postcss()],
+    plugins: [typescript({ exclude: ["**/*.stories.tsx", "**/*.test.tsx"] }), postcss()],
     external,
   },
   {
@@ -38,7 +38,7 @@ export default [
       exports: "named",
       sourcemap: true,
     },
-    plugins: [typescript(), postcss()],
+    plugins: [typescript({ exclude: ["**/*.stories.tsx", "**/*.test.tsx"] }), postcss()],
     external,
   },
   {

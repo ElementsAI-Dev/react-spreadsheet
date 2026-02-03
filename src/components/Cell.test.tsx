@@ -79,9 +79,12 @@ describe("<Cell />", () => {
     });
     const element = document.querySelector(".Spreadsheet__cell");
     expect(element).not.toBeNull();
-    expect(MOCK_DATA_VIEWER).toBeCalledTimes(1);
-    expect(MOCK_DATA_VIEWER).toBeCalledWith(EXAMPLE_DATA_VIEWER_PROPS, {});
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_DATA_VIEWER).toHaveBeenCalledTimes(1);
+    expect(MOCK_DATA_VIEWER).toHaveBeenCalledWith(
+      EXAMPLE_DATA_VIEWER_PROPS,
+      undefined,
+    );
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
   });
   test("renders read only", () => {
     render(<Cell {...EXAMPLE_PROPS} data={EXAMPLE_READ_ONLY_DATA} />, {
@@ -91,12 +94,12 @@ describe("<Cell />", () => {
       ".Spreadsheet__cell.Spreadsheet__cell--readonly",
     );
     expect(element).not.toBeNull();
-    expect(MOCK_DATA_VIEWER).toBeCalledTimes(1);
-    expect(MOCK_DATA_VIEWER).toBeCalledWith(
+    expect(MOCK_DATA_VIEWER).toHaveBeenCalledTimes(1);
+    expect(MOCK_DATA_VIEWER).toHaveBeenCalledWith(
       { ...EXAMPLE_DATA_VIEWER_PROPS, cell: EXAMPLE_READ_ONLY_DATA },
-      {},
+      undefined,
     );
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
   });
   test("renders with given class name", () => {
     render(<Cell {...EXAMPLE_PROPS} data={EXAMPLE_DATA_WITH_CLASS_NAME} />, {
@@ -106,12 +109,12 @@ describe("<Cell />", () => {
       `.Spreadsheet__cell.${EXAMPLE_DATA_WITH_CLASS_NAME.className}`,
     );
     expect(element).not.toBeNull();
-    expect(MOCK_DATA_VIEWER).toBeCalledTimes(1);
-    expect(MOCK_DATA_VIEWER).toBeCalledWith(
+    expect(MOCK_DATA_VIEWER).toHaveBeenCalledTimes(1);
+    expect(MOCK_DATA_VIEWER).toHaveBeenCalledWith(
       { ...EXAMPLE_DATA_VIEWER_PROPS, cell: EXAMPLE_DATA_WITH_CLASS_NAME },
-      {},
+      undefined,
     );
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
   });
   test("renders selected", () => {
     render(<Cell {...EXAMPLE_PROPS} selected />, {
@@ -122,8 +125,8 @@ describe("<Cell />", () => {
     if (!element) {
       throw new Error("element must be defined");
     }
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(1);
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledWith(
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(1);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledWith(
       EXAMPLE_POINT,
       getOffsetRect(element),
     );
@@ -138,7 +141,7 @@ describe("<Cell />", () => {
       throw new Error("element must be defined");
     }
     expect(document.activeElement === element);
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
   });
   test("handles mouse down", () => {
     render(<Cell {...EXAMPLE_PROPS} />, {
@@ -149,16 +152,16 @@ describe("<Cell />", () => {
     if (!element) {
       throw new Error("element must be defined");
     }
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
     fireEvent.mouseDown(element);
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(1);
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledWith(
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(1);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledWith(
       EXAMPLE_POINT,
       getOffsetRect(element),
     );
-    expect(MOCK_ACTIVATE).toBeCalledTimes(1);
-    expect(MOCK_ACTIVATE).toBeCalledWith(EXAMPLE_POINT);
-    expect(MOCK_SELECT).toBeCalledTimes(0);
+    expect(MOCK_ACTIVATE).toHaveBeenCalledTimes(1);
+    expect(MOCK_ACTIVATE).toHaveBeenCalledWith(EXAMPLE_POINT);
+    expect(MOCK_SELECT).toHaveBeenCalledTimes(0);
   });
   test("handles mouse down + shift", () => {
     render(<Cell {...EXAMPLE_PROPS} />, {
@@ -169,16 +172,16 @@ describe("<Cell />", () => {
     if (!element) {
       throw new Error("element must be defined");
     }
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
     fireEvent.mouseDown(element, { shiftKey: true });
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(1);
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledWith(
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(1);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledWith(
       EXAMPLE_POINT,
       getOffsetRect(element),
     );
-    expect(MOCK_ACTIVATE).toBeCalledTimes(0);
-    expect(MOCK_SELECT).toBeCalledTimes(1);
-    expect(MOCK_SELECT).toBeCalledWith(EXAMPLE_POINT);
+    expect(MOCK_ACTIVATE).toHaveBeenCalledTimes(0);
+    expect(MOCK_SELECT).toHaveBeenCalledTimes(1);
+    expect(MOCK_SELECT).toHaveBeenCalledWith(EXAMPLE_POINT);
   });
   test("handles mouse over with dragging", () => {
     render(<Cell {...EXAMPLE_PROPS} dragging />, {
@@ -189,16 +192,16 @@ describe("<Cell />", () => {
     if (!element) {
       throw new Error("element must be defined");
     }
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
     fireEvent.mouseOver(element);
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(1);
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledWith(
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(1);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledWith(
       EXAMPLE_POINT,
       getOffsetRect(element),
     );
-    expect(MOCK_ACTIVATE).toBeCalledTimes(0);
-    expect(MOCK_SELECT).toBeCalledTimes(1);
-    expect(MOCK_SELECT).toBeCalledWith(EXAMPLE_POINT);
+    expect(MOCK_ACTIVATE).toHaveBeenCalledTimes(0);
+    expect(MOCK_SELECT).toHaveBeenCalledTimes(1);
+    expect(MOCK_SELECT).toHaveBeenCalledWith(EXAMPLE_POINT);
   });
   test("custom cell DataViewer", () => {
     render(
@@ -209,11 +212,11 @@ describe("<Cell />", () => {
     );
     const element = document.querySelector(".Spreadsheet__cell");
     expect(element).not.toBeNull();
-    expect(MOCK_CUSTOM_DATA_VIEWER).toBeCalledTimes(1);
-    expect(MOCK_CUSTOM_DATA_VIEWER).toBeCalledWith(
+    expect(MOCK_CUSTOM_DATA_VIEWER).toHaveBeenCalledTimes(1);
+    expect(MOCK_CUSTOM_DATA_VIEWER).toHaveBeenCalledWith(
       EXAMPLE_CUSTOM_DATA_VIEWER_PROPS,
-      {},
+      undefined,
     );
-    expect(MOCK_SET_CELL_DIMENSIONS).toBeCalledTimes(0);
+    expect(MOCK_SET_CELL_DIMENSIONS).toHaveBeenCalledTimes(0);
   });
 });

@@ -28,16 +28,16 @@ export abstract class Selection {
 
 /** Selection of no cells */
 export class EmptySelection extends Selection {
-  toRange(data: Matrix.Matrix<unknown>): PointRange | null {
+  toRange(_data: Matrix.Matrix<unknown>): PointRange | null {
     return null;
   }
-  normalizeTo(data: Matrix.Matrix<unknown>): this {
+  normalizeTo(_data: Matrix.Matrix<unknown>): this {
     return this;
   }
-  hasEntireRow(row: number): boolean {
+  hasEntireRow(_row: number): boolean {
     return false;
   }
-  hasEntireColumn(column: number): boolean {
+  hasEntireColumn(_column: number): boolean {
     return false;
   }
   size(): number {
@@ -57,7 +57,7 @@ export class RangeSelection extends Selection {
     super();
   }
 
-  toRange(data: Matrix.Matrix<unknown>): PointRange | null {
+  toRange(_data: Matrix.Matrix<unknown>): PointRange | null {
     return this.range;
   }
 
@@ -68,11 +68,11 @@ export class RangeSelection extends Selection {
     return nextSelection;
   }
 
-  hasEntireRow(row: number): boolean {
+  hasEntireRow(_row: number): boolean {
     return false;
   }
 
-  hasEntireColumn(column: number): boolean {
+  hasEntireColumn(_column: number): boolean {
     return false;
   }
 
@@ -109,15 +109,15 @@ export class EntireWorksheetSelection extends EntireSelection {
     return cached;
   }
 
-  normalizeTo(data: Matrix.Matrix<unknown>): this {
+  normalizeTo(_data: Matrix.Matrix<unknown>): this {
     return this;
   }
 
-  hasEntireColumn(column: number): boolean {
+  hasEntireColumn(_column: number): boolean {
     return true;
   }
 
-  hasEntireRow(row: number): boolean {
+  hasEntireRow(_row: number): boolean {
     return true;
   }
 
@@ -125,7 +125,7 @@ export class EntireWorksheetSelection extends EntireSelection {
     return Matrix.getColumnsCount(data) * Matrix.getRowsCount(data);
   }
 
-  has(data: Matrix.Matrix<unknown>, point: Point.Point): boolean {
+  has(_data: Matrix.Matrix<unknown>, _point: Point.Point): boolean {
     return true;
   }
 
@@ -199,7 +199,7 @@ export class EntireRowsSelection extends EntireAxisSelection {
     return row >= this.start && row <= this.end;
   }
 
-  hasEntireColumn(column: number): boolean {
+  hasEntireColumn(_column: number): boolean {
     return false;
   }
 
@@ -240,7 +240,7 @@ export class EntireColumnsSelection extends EntireAxisSelection {
     return nextSelection;
   }
 
-  hasEntireRow(row: number): boolean {
+  hasEntireRow(_row: number): boolean {
     return false;
   }
 

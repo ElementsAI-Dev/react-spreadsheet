@@ -220,8 +220,8 @@ describe("<Spreadsheet />", () => {
       },
     });
     // Check onChange is called
-    expect(EXAMPLE_PROPS.onChange).toBeCalledTimes(1);
-    expect(EXAMPLE_PROPS.onChange).toBeCalledWith(EXAMPLE_MODIFIED_DATA);
+    expect(EXAMPLE_PROPS.onChange).toHaveBeenCalledTimes(1);
+    expect(EXAMPLE_PROPS.onChange).toHaveBeenCalledWith(EXAMPLE_MODIFIED_DATA);
   });
   test("handles external change of data correctly", () => {
     const { rerender } = render(<Spreadsheet {...EXAMPLE_PROPS} />);
@@ -289,8 +289,8 @@ describe("<Spreadsheet />", () => {
       shiftKey: true,
     });
     // Check onSelect is called with the range of cells on selection
-    expect(onSelect).toBeCalledTimes(1);
-    expect(onSelect).toBeCalledWith(
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledWith(
       new RangeSelection(new PointRange(Point.ORIGIN, { row: 1, column: 1 })),
     );
   });
@@ -375,8 +375,8 @@ describe("<Spreadsheet />", () => {
     const element = getSpreadsheetElement();
     const cornerIndicator = safeQuerySelector(element, "th");
     fireEvent.click(cornerIndicator);
-    expect(handleSelect).toBeCalledWith(new EntireWorksheetSelection());
-    expect(handleSelect).toBeCalledTimes(1);
+    expect(handleSelect).toHaveBeenCalledWith(new EntireWorksheetSelection());
+    expect(handleSelect).toHaveBeenCalledTimes(1);
   });
   test("select entire row", () => {
     const handleSelect = jest.fn();
@@ -387,7 +387,7 @@ describe("<Spreadsheet />", () => {
       "tr:nth-child(2) .Spreadsheet__header",
     );
     fireEvent.click(rowIndicator);
-    expect(handleSelect).toBeCalledWith(new EntireRowsSelection(0, 0));
+    expect(handleSelect).toHaveBeenCalledWith(new EntireRowsSelection(0, 0));
   });
   test("select entire rows", () => {
     const handleSelect = jest.fn();
@@ -406,7 +406,7 @@ describe("<Spreadsheet />", () => {
     fireEvent.click(secondRowIndicator, {
       shiftKey: true,
     });
-    expect(handleSelect).toBeCalledWith(new EntireRowsSelection(0, 1));
+    expect(handleSelect).toHaveBeenCalledWith(new EntireRowsSelection(0, 1));
   });
   test("select entire column", () => {
     const handleSelect = jest.fn();
@@ -417,7 +417,7 @@ describe("<Spreadsheet />", () => {
       "tr:nth-child(1) .Spreadsheet__header:nth-child(2)",
     );
     fireEvent.click(rowIndicator);
-    expect(handleSelect).toBeCalledWith(new EntireColumnsSelection(0, 0));
+    expect(handleSelect).toHaveBeenCalledWith(new EntireColumnsSelection(0, 0));
   });
   test("select entire columns", () => {
     const handleSelect = jest.fn();
@@ -436,7 +436,7 @@ describe("<Spreadsheet />", () => {
     fireEvent.click(secondColumnIndicator, {
       shiftKey: true,
     });
-    expect(handleSelect).toBeCalledWith(new EntireColumnsSelection(0, 1));
+    expect(handleSelect).toHaveBeenCalledWith(new EntireColumnsSelection(0, 1));
   });
   test("controlled entire row selection", () => {
     render(
