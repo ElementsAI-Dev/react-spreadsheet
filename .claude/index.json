@@ -1,0 +1,384 @@
+{
+  "version": "1.0.0",
+  "generated": "2025-02-03T00:00:00.000Z",
+  "project": {
+    "name": "react-spreadsheet",
+    "description": "Simple, customizable yet performant spreadsheet for React",
+    "version": "0.10.1",
+    "repository": "https://github.com/iddan/react-spreadsheet",
+    "license": "MIT"
+  },
+  "root": {
+    "path": "D:\\Project\\react-spreadsheet",
+    "documentation": "CLAUDE.md",
+    "lastUpdated": "2025-02-03T00:00:00.000Z"
+  },
+  "modules": [
+    {
+      "name": "Component Layer",
+      "path": "src/components",
+      "language": "TypeScript",
+      "responsibility": "React UI components with HOC enhancement pattern",
+      "entryPoints": [
+        "src/components/Spreadsheet.tsx"
+      ],
+      "keyFiles": [
+        "src/components/Spreadsheet.tsx",
+        "src/components/Cell.tsx",
+        "src/components/ActiveCell.tsx",
+        "src/components/DataViewer.tsx",
+        "src/components/DataEditor.tsx",
+        "src/components/Table.tsx",
+        "src/components/Row.tsx",
+        "src/components/HeaderRow.tsx",
+        "src/components/RowIndicator.tsx",
+        "src/components/ColumnIndicator.tsx",
+        "src/components/CornerIndicator.tsx",
+        "src/components/VirtualizedTable.tsx",
+        "src/components/Selected.tsx",
+        "src/components/Copied.tsx",
+        "src/components/FloatingRect.tsx"
+      ],
+      "testFiles": [
+        "src/components/Spreadsheet.test.tsx",
+        "src/components/Cell.test.tsx",
+        "src/components/ActiveCell.test.tsx",
+        "src/components/DataViewer.test.tsx",
+        "src/components/DataEditor.test.tsx",
+        "src/components/Table.test.tsx",
+        "src/components/Row.test.tsx",
+        "src/components/HeaderRow.test.tsx",
+        "src/components/RowIndicator.test.tsx",
+        "src/components/ColumnIndicator.test.tsx",
+        "src/components/CornerIndicator.test.tsx",
+        "src/components/VirtualizedTable.test.tsx",
+        "src/components/Selected.test.tsx",
+        "src/components/Copied.test.tsx",
+        "src/components/FloatingRect.test.tsx"
+      ],
+      "documentation": "llmdoc/architecture/component-layer.md",
+      "interfaces": [
+        "Props<CellType>",
+        "SpreadsheetRef"
+      ],
+      "dependencies": [
+        "src/state",
+        "src/core",
+        "src/engine",
+        "src/types"
+      ],
+      "exports": [
+        "Spreadsheet (default)",
+        "DataEditor",
+        "DataViewer",
+        "VirtualizedTable",
+        "useVirtualization"
+      ],
+      "hasTests": true,
+      "hasDocumentation": true,
+      "coverage": "complete"
+    },
+    {
+      "name": "State Management",
+      "path": "src/state",
+      "language": "TypeScript",
+      "responsibility": "Redux-style reducer with React Context optimization",
+      "entryPoints": [
+        "src/state/reducer.ts",
+        "src/state/context.ts"
+      ],
+      "keyFiles": [
+        "src/state/reducer.ts",
+        "src/state/actions.ts",
+        "src/state/context.ts",
+        "src/state/use-selector.ts",
+        "src/state/use-shallow-selector.ts",
+        "src/state/use-dispatch.ts"
+      ],
+      "testFiles": [
+        "src/state/reducer.test.ts"
+      ],
+      "documentation": "llmdoc/architecture/state-management.md",
+      "interfaces": [
+        "StoreState<Cell>",
+        "Action"
+      ],
+      "dependencies": [
+        "src/core",
+        "src/engine",
+        "src/types"
+      ],
+      "exports": [],
+      "hasTests": true,
+      "hasDocumentation": true,
+      "coverage": "complete"
+    },
+    {
+      "name": "Engine Layer",
+      "path": "src/engine",
+      "language": "TypeScript",
+      "responsibility": "Formula evaluation, dependency tracking, Model class",
+      "entryPoints": [
+        "src/engine/index.ts",
+        "src/engine/engine.ts"
+      ],
+      "keyFiles": [
+        "src/engine/engine.ts",
+        "src/engine/formula.ts",
+        "src/engine/point-graph.ts",
+        "src/engine/point-set.ts",
+        "src/engine/point-hash.ts"
+      ],
+      "testFiles": [
+        "src/engine/engine.test.ts",
+        "src/engine/formula.test.ts",
+        "src/engine/point-graph.test.ts",
+        "src/engine/point-set.test.ts"
+      ],
+      "documentation": "llmdoc/architecture/engine-layer.md",
+      "interfaces": [
+        "Model<Cell>",
+        "PointGraph",
+        "PointSet"
+      ],
+      "dependencies": [
+        "src/core",
+        "src/types",
+        "fast-formula-parser"
+      ],
+      "exports": [
+        "Model",
+        "createFormulaParser"
+      ],
+      "hasTests": true,
+      "hasDocumentation": true,
+      "coverage": "complete"
+    },
+    {
+      "name": "Core Data Structures",
+      "path": "src/core",
+      "language": "TypeScript",
+      "responsibility": "Immutable Matrix, Selection, Point, PointRange",
+      "entryPoints": [
+        "src/core/matrix.ts",
+        "src/core/selection.ts",
+        "src/core/point.ts",
+        "src/core/point-range.ts"
+      ],
+      "keyFiles": [
+        "src/core/matrix.ts",
+        "src/core/selection.ts",
+        "src/core/point.ts",
+        "src/core/point-range.ts"
+      ],
+      "testFiles": [
+        "src/core/matrix.test.ts",
+        "src/core/selection.test.ts",
+        "src/core/point.test.ts",
+        "src/core/point-range.test.ts"
+      ],
+      "documentation": "llmdoc/architecture/core-data-structures.md",
+      "interfaces": [
+        "Matrix<T>",
+        "Selection",
+        "Point",
+        "PointRange"
+      ],
+      "dependencies": [],
+      "exports": [
+        "Matrix (type)",
+        "createEmptyMatrix",
+        "Selection",
+        "EmptySelection",
+        "RangeSelection",
+        "EntireRowsSelection",
+        "EntireColumnsSelection",
+        "EntireWorksheetSelection",
+        "PointRange",
+        "Point (type)"
+      ],
+      "hasTests": true,
+      "hasDocumentation": true,
+      "coverage": "complete"
+    },
+    {
+      "name": "Stories",
+      "path": "src/stories",
+      "language": "TypeScript/TSX",
+      "responsibility": "Storybook stories for component visualization",
+      "entryPoints": [
+        "src/stories/Spreadsheet.stories.tsx"
+      ],
+      "keyFiles": [
+        "src/stories/Spreadsheet.stories.tsx",
+        "src/stories/CustomCell.tsx",
+        "src/stories/CustomCornerIndicator.tsx",
+        "src/stories/AsyncCellData.tsx",
+        "src/stories/RangeDataComponents.tsx",
+        "src/stories/SelectDataComponents.tsx"
+      ],
+      "testFiles": [],
+      "documentation": "http://localhost:6006",
+      "interfaces": [],
+      "dependencies": [
+        "src/components"
+      ],
+      "exports": [],
+      "hasTests": false,
+      "hasDocumentation": true,
+      "coverage": "partial"
+    },
+    {
+      "name": "Documentation",
+      "path": "llmdoc",
+      "language": "Markdown",
+      "responsibility": "Comprehensive LLM-friendly documentation",
+      "entryPoints": [
+        "llmdoc/index.md"
+      ],
+      "keyFiles": [
+        "llmdoc/index.md",
+        "llmdoc/overview/project-overview.md",
+        "llmdoc/overview/component-system-overview.md",
+        "llmdoc/overview/state-management-overview.md",
+        "llmdoc/overview/formula-engine-overview.md",
+        "llmdoc/overview/core-data-structures-overview.md",
+        "llmdoc/architecture/component-layer.md",
+        "llmdoc/architecture/state-management.md",
+        "llmdoc/architecture/engine-layer.md",
+        "llmdoc/architecture/core-data-structures.md",
+        "llmdoc/guides/development-workflow.md",
+        "llmdoc/guides/testing-guide.md",
+        "llmdoc/reference/public-api.md",
+        "llmdoc/reference/type-definitions.md"
+      ],
+      "testFiles": [],
+      "documentation": "llmdoc/index.md",
+      "interfaces": [],
+      "dependencies": [],
+      "exports": [],
+      "hasTests": false,
+      "hasDocumentation": true,
+      "coverage": "complete"
+    },
+    {
+      "name": "Website",
+      "path": "website",
+      "language": "TypeScript/MDX",
+      "responsibility": "Docusaurus documentation site",
+      "entryPoints": [
+        "website/docusaurus.config.ts"
+      ],
+      "keyFiles": [
+        "website/docusaurus.config.ts",
+        "website/docs/01-get-started.md",
+        "website/docs/02-usage.md",
+        "website/docs/03-formula-parser.md",
+        "website/docs/04-contributing.md",
+        "website/docs/05-virtualization.md"
+      ],
+      "testFiles": [],
+      "documentation": "https://iddan.github.io/react-spreadsheet/docs",
+      "interfaces": [],
+      "dependencies": [],
+      "exports": [],
+      "hasTests": false,
+      "hasDocumentation": true,
+      "coverage": "complete"
+    }
+  ],
+  "shared": {
+    "types": "src/types.ts",
+    "utilities": "src/util.ts",
+    "jestSetup": "src/jest-setup.ts",
+    "mainEntry": "src/index.ts"
+  },
+  "build": {
+    "tool": "Rollup",
+    "config": "rollup.config.mjs",
+    "outputDirectory": "dist/",
+    "outputs": [
+      "dist/index.js (CJS)",
+      "dist/es/index.js (ESM)",
+      "dist/index.d.ts (Types)"
+    ]
+  },
+  "testing": {
+    "framework": "Jest",
+    "preset": "ts-jest",
+    "setupFile": "src/jest-setup.ts",
+    "coverageCommand": "yarn test:coverage",
+    "testPattern": "**/*.test.ts"
+  },
+  "documentation": {
+    "system": "llmdoc",
+    "index": "llmdoc/index.md",
+    "externalDocs": "https://iddan.github.io/react-spreadsheet/docs",
+    "storybook": "http://localhost:6006",
+    "storybookStatic": "https://iddan.github.io/react-spreadsheet/storybook"
+  },
+  "coverage": {
+    "totalFiles": 67,
+    "scannedFiles": 67,
+    "coveragePercentage": 100,
+    "gaps": [],
+    "truncated": false
+  },
+  "ignoreRules": {
+    "gitignore": [
+      "logs/**",
+      "*.log",
+      "npm-debug.log*",
+      "yarn-debug.log*",
+      "yarn-error.log*",
+      "pids/**",
+      "*.pid",
+      "*.seed",
+      "*.pid.lock",
+      "lib-cov/**",
+      "coverage/**",
+      ".nyc_output/**",
+      ".grunt/**",
+      "bower_components/**",
+      "node_modules/**",
+      "jspm_packages/**",
+      ".npm/**",
+      ".eslintcache",
+      ".node_repl_history",
+      "*.tgz",
+      ".yarn-integrity",
+      ".env",
+      "dist/**",
+      "reference/**",
+      "storybook-static/**",
+      ".ace-tool/**",
+      "nul"
+    ],
+    "additional": [
+      "node_modules/**",
+      ".git/**",
+      ".github/**",
+      "dist/**",
+      "build/**",
+      ".next/**",
+      "__pycache__/**",
+      "*.lock",
+      "*.log",
+      "*.bin",
+      "*.pdf",
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.mp4",
+      "*.zip",
+      "*.tar",
+      "*.gz"
+    ]
+  },
+  "nextSteps": [
+    "All modules have been documented",
+    "Consider adding module-level CLAUDE.md files for deeper context if needed",
+    "Review llmdoc/agent/ directory for temporary scout reports (can be deleted)"
+  ]
+}
